@@ -38,6 +38,30 @@ Contains all the static content for the impulses. This data is read-only for the
 | &nbsp;&nbsp;`movementText` | String | |
 | `zoneFocusText` | String | Summary of focus ("Heute stehen Schlaf und Stress..."). |
 
+#### Example Data Structures for Maps:
+
+**`zones` (Map/Object)**:
+```json
+{
+  "sleep": true,
+  "stress": true,
+  "heart": false,
+  "inflammation": false,
+  "movement": false
+}
+```
+
+**`zoneDetails` (Map/Object)**:
+```json
+{
+  "sleepText": "Diese Zone steht für Erholung und Rhythmus...",
+  "stressText": "Diese Zone reguliert innere Sicherheit...",
+  "heartText": "",
+  "inflammationText": "",
+  "movementText": ""
+}
+```
+
 ---
 
 ### 2. `users` (Collection)
