@@ -1,0 +1,76 @@
+# Cloud Function for Notifications
+
+## Overview
+To send reliable push notifications at a user-specified time (e.g., "Morning", "Lunch", "Evening"), we will use a **Scheduled Cloud Function** combined with **Firebase Cloud Messaging (FCM)**.
+
+## Function: `sendDailyImpulseNotifications`
+
+### Trigger
+*   **Schedule**: Runs at specific predefined times that match the user's selection options in the app.
+*   **Time Slots**: 
+    *   **Morning**: 08:00
+    *   **Lunch**: 12:00
+    *   **Evening**: 18:00
+*   **Cron Syntax**: `0 8,12,18 * * *` (At 08:00, 12:00, and 18:00 daily).
+
+### Logic
+1.  **Identify Time Slot**:
+    *   Extract the current hour in local timezone (**Europe/Berlin**).
+    *   Determine the corresponding label: `morning`, `lunch`, or `evening`.
+2.  **Query Users**:
+    *   Query the `users` collection.
+    *   **Filters**:
+        *   `notifications_enabled` == `true`
+        *   `notification_time_slot` == `[current_label]` (e.g., "morning").
+3.  **Construct Payload**:
+    *   **Title**: "LivaNova Impulse"
+    *   **Body**: "Dein täglicher Impuls wartet auf dich!"
+    *   **Data**: `{ "route": "home" }`
+4.  **Send**:
+    *   Batch send to all FCM tokens.
+
+### Prerequisites
+1.  **FCM Token**: The app must save the device's Push Token to the `users/{uid}/fcm_token` field.
+2.  **Time Slot Selection**: During onboarding, the user selects one of the 3 slots, which is saved to `notification_time_slot`.
+
+### Code Structure (Concept)
+```javascript
+// Triggered at 8am, 12pm, and 6pm Berlin time
+exports.sendDailyNotifications = functions.pubsub
+    .schedule('0 8,12,18 * * *')
+    .timeZone('Europe/Berlin')
+    .onRun(async (context) => {
+        const hour = new Date().getHours();
+        let slot = '';
+        
+        if (hour === 8) slot = 'morning';
+        else if (hour === 12) slot = 'lunch';
+        else if (hour === 18) slot = 'evening';
+
+        if (!slot) return null;
+
+        const usersSnapshot = await admin.firestore().collection('users')
+            .where('notifications_enabled', '==', true)
+            .where('notification_time_slot', '==', slot)
+            .get();
+
+        const tokens = [];
+        usersSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.fcm_token) tokens.push(data.fcm_token);
+        });
+
+        if (tokens.length > 0) {
+            const payload = {
+                notification: {
+                    title: 'LivaNova Impulse',
+                    body: 'Dein täglicher Impuls wartet auf dich!',
+                },
+                data: { click_action: 'FLUTTER_NOTIFICATION_CLICK' }
+            };
+            return admin.messaging().sendToDevice(tokens, payload);
+        }
+        return null;
+    });
+```
+
