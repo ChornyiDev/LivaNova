@@ -57,7 +57,9 @@ exports.sendDailyNotifications = functions.pubsub
         const tokens = [];
         usersSnapshot.forEach(doc => {
             const data = doc.data();
-            if (data.fcm_token) tokens.push(data.fcm_token);
+            if (data.fcm_tokens && Array.isArray(data.fcm_tokens)) {
+                tokens.push(...data.fcm_tokens);
+            }
         });
 
         if (tokens.length > 0) {

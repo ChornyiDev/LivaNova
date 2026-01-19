@@ -10,33 +10,33 @@ The database will be hosted on **Cloud Firestore**. The structure is designed to
 
 Contains all the static content for the impulses. This data is read-only for the client app.
 
-**Document ID**: `impulseId` (e.g., "1001" or auto-generated, but using a sequence-mapped ID helps).
+**Document ID**: `impulse_id` (e.g., "1001" or auto-generated, but using a sequence-mapped ID helps).
 
 **Fields**:
 | Field Name | Data Type | Description |
 | :--- | :--- | :--- |
 | `sequence` | Integer | **Critical**. Determines the order of impulses (1, 2, 3...). Used to match with user's progress. |
-| `titleShort` | String | Short title (max 6 words). |
-| `titleFull` | String | Full title (max 12 words). |
-| `hookText` | String | Catchy intro text. |
-| `motivatorText` | String | Psychological motivation text. |
-| `impulsLongText` | String | The main content. |
-| `zonesBridgeText` | String | Transition text to the 5-zone model. |
-| `wellbeingWeight` | Integer | Points (1-3) added to user's score upon acceptance. |
+| `title_short` | String | Short title (max 6 words). |
+| `title_full` | String | Full title (max 12 words). |
+| `hook_text` | String | Catchy intro text. |
+| `motivator_text` | String | Psychological motivation text. |
+| `impulse_long_text` | String | The main content. |
+| `zones_bridge_text` | String | Transition text to the 5-zone model. |
+| `wellbeing_weight` | Integer | Points (1-3) added to user's score upon acceptance. |
 | `tags` | Array<String> | For filtering in Library (e.g., ["Morgen", "Alltag"]). |
 | `zones` | Object/Map | Boolean flags for the 5 zones. |
 | &nbsp;&nbsp;`sleep` | Boolean | |
 | &nbsp;&nbsp;`stress` | Boolean | |
-| &nbsp;&nbsp;`heart` | Boolean | (herzActive) |
-| &nbsp;&nbsp;`inflammation`| Boolean | (entzuendungActive) |
-| &nbsp;&nbsp;`movement` | Boolean | (bewegungActive) |
-| `zoneDetails` | Object/Map | Specific text for each zone if active. |
-| &nbsp;&nbsp;`sleepText` | String | |
-| &nbsp;&nbsp;`stressText` | String | |
-| &nbsp;&nbsp;`heartText` | String | |
-| &nbsp;&nbsp;`inflammationText`| String | |
-| &nbsp;&nbsp;`movementText` | String | |
-| `zoneFocusText` | String | Summary of focus ("Heute stehen Schlaf und Stress..."). |
+| &nbsp;&nbsp;`heart` | Boolean | |
+| &nbsp;&nbsp;`inflammation`| Boolean | |
+| &nbsp;&nbsp;`movement` | Boolean | |
+| `zone_details` | Object/Map | Specific text for each zone if active. |
+| &nbsp;&nbsp;`sleep_text` | String | |
+| &nbsp;&nbsp;`stress_text` | String | |
+| &nbsp;&nbsp;`heart_text` | String | |
+| &nbsp;&nbsp;`inflammation_text`| String | |
+| &nbsp;&nbsp;`movement_text` | String | |
+| `zone_focus_text` | String | Summary of focus ("Heute stehen Schlaf und Stress..."). |
 
 #### Example Data Structures for Maps:
 
@@ -51,14 +51,14 @@ Contains all the static content for the impulses. This data is read-only for the
 }
 ```
 
-**`zoneDetails` (Map/Object)**:
+**`zone_details` (Map/Object)**:
 ```json
 {
-  "sleepText": "Diese Zone steht für Erholung und Rhythmus...",
-  "stressText": "Diese Zone reguliert innere Sicherheit...",
-  "heartText": "",
-  "inflammationText": "",
-  "movementText": ""
+  "sleep_text": "Diese Zone steht für Erholung und Rhythmus...",
+  "stress_text": "Diese Zone reguliert innere Sicherheit...",
+  "heart_text": "",
+  "inflammation_text": "",
+  "movement_text": ""
 }
 ```
 
@@ -83,13 +83,15 @@ Stores user profile, state, and progress.
 | `current_impulse_sequence` | Integer | The `sequence` number of the impulse the user is currently on (starts at 1). |
 | `last_decision_date` | Date/Timestamp | The date when the last decision (Accept/Not Today) was made. Used to determine if "Done" screen should be shown. |
 | **Stats** | | |
-| `wellbeing_score` | Integer | Sum of `wellbeingWeight` of all accepted impulses. |
+| `wellbeing_score` | Integer | Sum of `wellbeing_weight` of all accepted impulses. |
 | `saved_count` | Integer | Total number of accepted impulses. |
 | `streak_count` | Integer | Days in a row a decision was made. |
 | `last_streak_update` | Date/Timestamp | Used to calculate if streak continues or resets. |
 | **Settings** | | |
+| `is_onboarding_finished` | Boolean | True if user has completed the initial setup. |
 | `notifications_enabled` | Boolean | |
-| `notification_time` | Timestamp/String | Preferred time for daily notification. |
+| `notification_time_slot` | String | Preferred time slot ("morning", "lunch", "evening"). |
+| `fcm_tokens` | Array<String> | List of device tokens for push notifications. |
 
 ---
 
@@ -98,7 +100,7 @@ Stores user profile, state, and progress.
 Stores the impulses that the user has "Accepted".
 _Why a sub-collection?_ To allow efficient filtering and searching specific to the user without downloading the entire history effectively.
 
-**Document ID**: `impulseId` (Same as the global impulse ID).
+**Document ID**: `impulse_id` (Same as the global impulse ID).
 
 **Fields**:
 
@@ -118,6 +120,6 @@ _Why a sub-collection?_ To allow efficient filtering and searching specific to t
 
 - `users/{uid}/library`:
   - Index on `saved_at` (DESC) for default sorting.
-  - Index on `titleFull` for search.
+  - Index on `title_full` for search.
   - Index on `tags` (Array-contains) for filtering.
   - Index on `zones.sleep`, `zones.stress`, etc., for zone filtering.
