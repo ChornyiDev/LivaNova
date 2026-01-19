@@ -1,4 +1,4 @@
-# LivaNova Project Documentation
+# LIVANORA Project Documentation
 
 Welcome to the technical documentation for the LivaNova MVP. This project is built using FlutterFlow and Firebase.
 
