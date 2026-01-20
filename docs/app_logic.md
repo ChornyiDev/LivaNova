@@ -93,3 +93,65 @@
 *   **Trigger**: Cloud Function (see [cloud_functions.md](cloud_functions.md)).
 *   **User Setting**: In Profile, user toggles `notifications_enabled` and sets `notification_time_slot`.
 *   **Action**: When notification arrives, tapping it opens the App.
+
+---
+
+## 6. Implementation Snippets (FlutterFlow)
+
+### Next Day Calculation (Inline Function / Expression)
+**Use Case**: Displaying or using the date for tomorrow in `d/M/y` format.
+**Return Type**: `String`
+
+```dart
+// Returns tomorrow's date like "20/1/2026"
+"${DateTime.now().add(const Duration(days: 1)).day}/${DateTime.now().add(const Duration(days: 1)).month}/${DateTime.now().add(const Duration(days: 1)).year}"
+```
+
+### Check if Decision was Made Today
+**Use Case**: Visibility logic for Home Screen (Show "Done" placeholder if `true`).
+**Argument**: `lastDecisionDate` (String?) - expected format "d/M/y"
+**Return Type**: `Boolean`
+
+```dart
+lastDecisionDate == "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}"
+```
+
+### Multi-Zone & Tag Filtering Logic (Client-side)
+**Use Case**: Filtering Library items by 5 checkboxes and a list of tags.
+**Argument**: `impulses` (List), 5 nullable booleans, `fTags` (List<String>?).
+**Return Type**: `List<ImpulsesRecord>`
+
+```dart
+List<ImpulsesRecord> filterImpulsesAdvanced(
+  List<ImpulsesRecord> impulses,
+  bool? fSleep, bool? fStress, bool? fHeart, bool? fInflam, bool? fMove,
+  List<String>? fTags,
+) {
+  final bool s = fSleep ?? false;
+  final bool st = fStress ?? false;
+  final bool h = fHeart ?? false;
+  final bool i = fInflam ?? false;
+  final bool m = fMove ?? false;
+  final List<String> selectedTags = fTags ?? [];
+
+  if (!s && !st && !h && !i && !m && selectedTags.isEmpty) return impulses;
+
+  return impulses.where((impulse) {
+    bool zoneMatch = !s && !st && !h && !i && !m; // True if no zones selected
+    final zones = impulse.zones;
+    if (s && zones.sleep == true) zoneMatch = true;
+    if (st && zones.stress == true) zoneMatch = true;
+    if (h && zones.heart == true) zoneMatch = true;
+    if (i && zones.inflammation == true) zoneMatch = true;
+    if (m && zones.movement == true) zoneMatch = true;
+
+    bool tagMatch = selectedTags.isEmpty; // True if no tags selected
+    if (selectedTags.isNotEmpty) {
+      final impulseTags = impulse.tags;
+      tagMatch = selectedTags.any((tag) => impulseTags.contains(tag));
+    }
+
+    return zoneMatch && tagMatch;
+  }).toList();
+}
+```

@@ -23,6 +23,10 @@ Welcome to the technical documentation for the LivaNova MVP. This project is bui
 *   **Purpose**: Strategy for tracking KPIs and setup instructions.
 *   **Contents**: Key metrics (DAU, Retention), Custom Events, and Google Analytics integration guide.
 
+### 5. [Security Rules](./docs/firestore_rules.md)
+*   **Purpose**: Security configuration for Firestore.
+*   **Contents**: Detailed table for FlutterFlow Rules manager and raw security rules code.
+
 ---
 
 ## Getting Started

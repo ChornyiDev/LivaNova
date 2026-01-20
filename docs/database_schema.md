@@ -90,7 +90,7 @@ Stores user profile, state, and progress.
 | **Settings** | | |
 | `is_onboarding_finished` | Boolean | True if user has completed the initial setup. |
 | `notifications_enabled` | Boolean | |
-| `notification_time_slot` | String | Preferred time slot ("morning", "lunch", "evening"). |
+| `notification_time_slot` | String | Preferred time slot ("morning", "forenoon", "midday", "afternoon", "evening", "later"). |
 | `fcm_tokens` | Array<String> | List of device tokens for push notifications. |
 
 ---
