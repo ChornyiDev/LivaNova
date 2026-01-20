@@ -122,7 +122,7 @@ lastDecisionDate == "${DateTime.now().day}/${DateTime.now().month}/${DateTime.no
 **Return Type**: `List<ImpulsesRecord>`
 
 ```dart
-List<ImpulsesRecord> filterImpulsesAdvanced(
+List<ImpulsesRecord> filterLibraryByZonesAndTags(
   List<ImpulsesRecord> impulses,
   bool? fSleep, bool? fStress, bool? fHeart, bool? fInflam, bool? fMove,
   List<String>? fTags,
@@ -155,3 +155,7 @@ List<ImpulsesRecord> filterImpulsesAdvanced(
   }).toList();
 }
 ```
+
+### Initial Filter Tags
+These tags are now stored in the **`tags` (Collection)** and should be fetched dynamically to populate filters in the Library:
+*   `Morgen`, `Alltag`, `Übergang`, `Hydration`, `Routine`, `Bewegung`, `Aktivierung`.
