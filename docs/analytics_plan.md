@@ -16,8 +16,8 @@ Implement these custom events in your FlutterFlow actions:
 
 | Event Name | Parameter | Description |
 | :--- | :--- | :--- |
-| `impulse_viewed` | `impulse_id` (String) | Triggered when the daily impulse card is shown. |
-| `decision_made` | `type` ("accept" / "skip"), `impulse_id` (String) | Triggered when user clicks "Accept" or "Not Today". |
+| `impulse_viewed` | `impulse_id` (String), `impulse_order` (Number) | Triggered when the daily impulse card is shown. `impulse_order` is the sequential number of the impulse (1, 2, 3, etc.). |
+| `decision_made` | `type` (\"accept\" / \"skip\"), `impulse_id` (String), `impulse_sequence` (Number) | Triggered when user clicks \"Accept\" or \"Not Today\". `impulse_order` is the sequential number of the impulse. |
 | `library_opened` | - | Triggered when navigating to the Library. |
 | `onboarding_complete` | - | Triggered when user finishes the welcome flow. |
 

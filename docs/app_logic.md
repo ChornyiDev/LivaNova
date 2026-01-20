@@ -118,15 +118,32 @@ lastDecisionDate == "${DateTime.now().day}/${DateTime.now().month}/${DateTime.no
 
 ### Multi-Zone & Tag Filtering Logic (Client-side)
 **Use Case**: Filtering Library items by 5 checkboxes and a list of tags.
-**Argument**: `impulses` (List), 5 nullable booleans, `fTags` (List<String>?).
-**Return Type**: `List<ImpulsesRecord>`
+
+**Parameters (Arguments)**:
+1.  `impulses`: `List<LibraryRecord>` (The list of items from User's Library)
+2.  `fSleep`: `Boolean?` (Checkbox for Sleep zone)
+3.  `fStress`: `Boolean?` (Checkbox for Stress zone)
+4.  `fHeart`: `Boolean?` (Checkbox for Heart zone)
+5.  `fInflam`: `Boolean?` (Checkbox for Inflammation zone)
+6.  `fMove`: `Boolean?` (Checkbox for Movement zone)
+7.  `fTags`: `List<String>?` (Selected tags for filtering)
+8.  `sortDirection`: `String?` ("ASC" or "DESC")
+
+**Return Type**: `List<LibraryRecord>`
 
 ```dart
-List<ImpulsesRecord> filterLibraryByZonesAndTags(
-  List<ImpulsesRecord> impulses,
-  bool? fSleep, bool? fStress, bool? fHeart, bool? fInflam, bool? fMove,
+List<LibraryRecord> filterLibraryByZonesAndTags(
+  List<LibraryRecord>? impulses,
+  bool? fSleep, 
+  bool? fStress, 
+  bool? fHeart, 
+  bool? fInflam, 
+  bool? fMove,
   List<String>? fTags,
+  String? sortDirection,
 ) {
+  if (impulses == null) return [];
+
   final bool s = fSleep ?? false;
   final bool st = fStress ?? false;
   final bool h = fHeart ?? false;
@@ -134,28 +151,90 @@ List<ImpulsesRecord> filterLibraryByZonesAndTags(
   final bool m = fMove ?? false;
   final List<String> selectedTags = fTags ?? [];
 
-  if (!s && !st && !h && !i && !m && selectedTags.isEmpty) return impulses;
-
-  return impulses.where((impulse) {
-    bool zoneMatch = !s && !st && !h && !i && !m; // True if no zones selected
+  // 1. Filtering Logic
+  var filteredList = impulses.where((impulse) {
+    bool zoneMatch = !s && !st && !h && !i && !m; 
     final zones = impulse.zones;
-    if (s && zones.sleep == true) zoneMatch = true;
-    if (st && zones.stress == true) zoneMatch = true;
-    if (h && zones.heart == true) zoneMatch = true;
-    if (i && zones.inflammation == true) zoneMatch = true;
-    if (m && zones.movement == true) zoneMatch = true;
+    if (zones != null) {
+      if (s && zones.sleep == true) zoneMatch = true;
+      if (st && zones.stress == true) zoneMatch = true;
+      if (h && zones.heart == true) zoneMatch = true;
+      if (i && zones.inflammation == true) zoneMatch = true;
+      if (m && zones.movement == true) zoneMatch = true;
+    }
 
-    bool tagMatch = selectedTags.isEmpty; // True if no tags selected
+    bool tagMatch = selectedTags.isEmpty; 
     if (selectedTags.isNotEmpty) {
-      final impulseTags = impulse.tags;
+      final impulseTags = impulse.tags ?? [];
       tagMatch = selectedTags.any((tag) => impulseTags.contains(tag));
     }
 
     return zoneMatch && tagMatch;
   }).toList();
+
+  // 2. Sorting Logic (by saved_at)
+  if (sortDirection != null && sortDirection.isNotEmpty) {
+    filteredList.sort((a, b) {
+      final DateTime timeA = a.savedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final DateTime timeB = b.savedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      if (sortDirection == 'ASC') {
+        return timeA.compareTo(timeB);
+      } else {
+        return timeB.compareTo(timeA);
+      }
+    });
+  }
+
+  return filteredList;
 }
 ```
 
 ### Initial Filter Tags
 These tags are now stored in the **`tags` (Collection)** and should be fetched dynamically to populate filters in the Library:
 *   `Morgen`, `Alltag`, `Übergang`, `Hydration`, `Routine`, `Bewegung`, `Aktivierung`.
+
+### Request Notification Permission & Get Token (Custom Action)
+**Use Case**: Onboarding Step 3 - Request permission and save token immediately.
+**Return Type**: `Future<String?>`
+**Dependencies**: `firebase_messaging`
+
+```dart
+// Custom Action: requestNotificationPermissionAndGetToken
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<String?> requestNotificationPermissionAndGetToken() async {
+  try {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // 1. Request Permission for all platforms
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false, // Set true for silent notifications on iOS 12+
+      sound: true,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      
+      // 2. Get Token
+      // On Web, ensure VAPID key is configured in your FlutterFlow project settings
+      String? token = await messaging.getToken();
+      
+      print('FCM Token: $token');
+      return token;
+    } else {
+      print('User declined or has not accepted permission');
+      return null;
+    }
+  } catch (e) {
+    print('Error requesting permission or getting token: $e');
+    return null;
+  }
+}
+```
