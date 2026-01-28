@@ -98,13 +98,13 @@
 
 ## 6. Implementation Snippets (FlutterFlow)
 
-### Next Day Calculation (Inline Function / Expression)
-**Use Case**: Displaying or using the date for tomorrow in `d/M/y` format.
+### Yesterday Calculation (Inline Function / Expression)
+**Use Case**: Comparing `last_streak_update` to check if the streak should increment.
 **Return Type**: `String`
 
 ```dart
-// Returns tomorrow's date like "20/1/2026"
-"${DateTime.now().add(const Duration(days: 1)).day}/${DateTime.now().add(const Duration(days: 1)).month}/${DateTime.now().add(const Duration(days: 1)).year}"
+// Returns yesterday's date like "27/1/2026"
+"${DateTime.now().subtract(const Duration(days: 1)).day}/${DateTime.now().subtract(const Duration(days: 1)).month}/${DateTime.now().subtract(const Duration(days: 1)).year}"
 ```
 
 ### Check if Decision was Made Today
